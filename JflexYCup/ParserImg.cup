@@ -1,0 +1,91 @@
+package analizadores;
+
+import java_cup.runtime.*;
+import objetos.ErrorCom;
+import estructuras.ListaEnlSim;
+import objetos.Capa;
+import objetos.Pixel;
+import objetos.Imagen;
+
+parser code {:
+
+    ListaEnlSim<ErrorCom> erroresCom;
+    ListaEnlSim<Imagen> todasImagenesAct;    
+    Imagen imagenAct;
+
+	public ParserImg(LexerImg lex) {
+		super(lex);
+        this.erroresCom = lex.getErroresCom();
+        todasImagenesAct = new ListaEnlSim<>();
+        imagenAct = new Imagen();        
+	}
+
+    /**
+     * Método al que se llama automáticamente ante algún error sintactico.
+     **/ 
+    public void syntax_error(Symbol s){ 
+        erroresCom.add(erroresCom,new ErrorCom("Sintactico","No se esperaba Componente",String.valueOf(s.left),String.valueOf(s.right),String.valueOf(s.value)));
+    } 
+
+    /**
+     * Método al que se llama automáticamente ante algún error sintáctico 
+     * en el que ya no es posible una recuperación de errores.
+     **/ 
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+        erroresCom.add(erroresCom,new ErrorCom("Sintactico","Error sintactico Irrecuperable",String.valueOf(s.left),String.valueOf(s.right),String.valueOf(s.value)));
+    }
+
+    protected int error_sync_size() {
+		return 2;
+	}
+
+    private void crearImagen(int idImagen){
+        imagenAct = new Imagen();  
+        imagenAct.setIdImagen(idImagen);                
+    }
+
+    private void insImagen(){
+        todasImagenesAct.add(todasImagenesAct,imagenAct);
+    }
+
+    public ListaEnlSim<Imagen> getTodasImagenes(){
+        return todasImagenesAct;
+    }
+
+    public ListaEnlSim<ErrorCom> getErroresCom(){
+        return this.erroresCom;
+    }
+:}
+
+/* Terminals (tokens returned by the scanner). */
+terminal 	String NUM;
+terminal 	COMA,CORCHI,CORCHD;
+
+
+
+
+/* Non-Terminals (created scanner). */
+non terminal  inicio,sig,sigp;
+
+
+/* The grammar : */
+
+start with inicio;
+
+inicio ::= 
+            NUM:idImg CORCHI {:crearImagen(Integer.valueOf(idImg));:} sig CORCHD {:insImagen();:}  inicio
+        |   error inicio
+        |
+;
+
+sig ::=
+            NUM:idCapa {:imagenAct.setNuevoIdCapaIns(idCapa);:} sigp            
+        |   error sig
+        |
+;
+
+sigp ::=
+            COMA sig
+        |   error sigp
+        |
+;

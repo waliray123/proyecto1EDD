@@ -1,0 +1,97 @@
+package analizadores;
+
+import java_cup.runtime.*;
+import objetos.ErrorCom;
+import estructuras.ListaEnlSim;
+import objetos.Capa;
+import objetos.Pixel;
+
+parser code {:
+
+    ListaEnlSim<ErrorCom> erroresCom;
+    ListaEnlSim<Pixel> todosPixelesAct;
+    ListaEnlSim<Capa> todasCapas;
+    Capa capaAct;
+    Pixel pixelAct;
+
+	public ParserCapas(LexerCapas lex) {
+		super(lex);
+        this.erroresCom = lex.getErroresCom();
+        todasCapas = new ListaEnlSim<>();
+	}
+
+    /**
+     * Método al que se llama automáticamente ante algún error sintactico.
+     **/ 
+    public void syntax_error(Symbol s){ 
+        erroresCom.add(erroresCom,new ErrorCom("Sintactico","No se esperaba Componente",String.valueOf(s.left),String.valueOf(s.right),String.valueOf(s.value)));
+    } 
+
+    /**
+     * Método al que se llama automáticamente ante algún error sintáctico 
+     * en el que ya no es posible una recuperación de errores.
+     **/ 
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+        erroresCom.add(erroresCom,new ErrorCom("Sintactico","Error sintactico Irrecuperable",String.valueOf(s.left),String.valueOf(s.right),String.valueOf(s.value)));
+    }
+
+    protected int error_sync_size() {
+		return 2;
+	}
+    
+    private void crearPixel(){
+        pixelAct = new Pixel();        
+    }
+
+    private void insPixel(){
+        todosPixelesAct.add(todosPixelesAct,pixelAct);
+    }
+
+    private void crearCapa(int idCapa){
+        capaAct = new Capa();
+        capaAct.setIdCapa(idCapa);
+        todosPixelesAct = new ListaEnlSim<>();
+        capaAct.setPixelesIns(todosPixelesAct);
+    }
+
+    private void insCapa(){
+        todasCapas.add(todasCapas,capaAct);
+    }
+
+    public ListaEnlSim<Capa> getTodasCapas(){
+        return todasCapas;
+    }
+
+    public ListaEnlSim<ErrorCom> getErroresCom(){
+        return this.erroresCom;
+    }
+:}
+
+/* Terminals (tokens returned by the scanner). */
+terminal 	String NUM;
+terminal 	String HEXA;
+terminal 	COMA,PUNT_COMA,CORCHI,CORCHD;
+
+
+
+
+/* Non-Terminals (created scanner). */
+non terminal  inicio,pixl;
+
+
+/* The grammar : */
+
+start with inicio;
+
+inicio ::= 
+            NUM:idCapa CORCHI {:crearCapa(Integer.valueOf(idCapa));:} pixl CORCHD {:insCapa();:}  inicio
+        |   error inicio
+        |
+;
+
+pixl ::=
+            {:crearPixel();:} NUM:fil {:pixelAct.setFila(Integer.valueOf(fil));:} COMA NUM:col {:pixelAct.setColumna(Integer.valueOf(col));:} COMA HEXA:color {:pixelAct.setColor(color);:} PUNT_COMA {:insPixel();:} pixl
+        |   error pixl
+        |
+;
+

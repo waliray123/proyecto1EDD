@@ -1,0 +1,89 @@
+package analizadores;
+
+import java_cup.runtime.*;
+import objetos.ErrorCom;
+import estructuras.ListaEnlSim;
+import objetos.Usuario;
+
+parser code {:
+
+    ListaEnlSim<ErrorCom> erroresCom;
+    ListaEnlSim<Usuario> todosUsuarios;    
+    Usuario usuarioAct;
+
+	public ParserUsers(LexerUsers lex) {
+		super(lex);
+        this.erroresCom = lex.getErroresCom();
+        todosUsuarios = new ListaEnlSim<>();
+        usuarioAct = new Usuario();        
+	}
+
+    /**
+     * Método al que se llama automáticamente ante algún error sintactico.
+     **/ 
+    public void syntax_error(Symbol s){ 
+        erroresCom.add(erroresCom,new ErrorCom("Sintactico","No se esperaba Componente",String.valueOf(s.left),String.valueOf(s.right),String.valueOf(s.value)));
+    } 
+
+    /**
+     * Método al que se llama automáticamente ante algún error sintáctico 
+     * en el que ya no es posible una recuperación de errores.
+     **/ 
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+        erroresCom.add(erroresCom,new ErrorCom("Sintactico","Error sintactico Irrecuperable",String.valueOf(s.left),String.valueOf(s.right),String.valueOf(s.value)));
+    }
+
+    protected int error_sync_size() {
+		return 2;
+	}
+
+    private void crearUsuario(String nombreU){
+        usuarioAct = new Usuario();  
+        usuarioAct.setNombreUsuario(nombreU);                
+    }
+
+    private void insUsuario(){
+        todosUsuarios.add(todosUsuarios,usuarioAct);
+    }
+
+    public ListaEnlSim<Usuario> getTodosUsuarios(){
+        return todosUsuarios;
+    }
+
+    public ListaEnlSim<ErrorCom> getErroresCom(){
+        return this.erroresCom;
+    }
+:}
+
+/* Terminals (tokens returned by the scanner). */
+terminal 	String NUM,NOMU;
+terminal 	COMA,DOS_PUNT,PUNT_COMA;
+
+
+
+
+/* Non-Terminals (created scanner). */
+non terminal  inicio,sig,sigp;
+
+
+/* The grammar : */
+
+start with inicio;
+
+inicio ::= 
+            NOMU:nomb DOS_PUNT {:crearUsuario(nomb);:} sig PUNT_COMA {:insUsuario();:} inicio
+        |   error inicio
+        |
+;
+
+sig ::=
+            NUM:idImg {:usuarioAct.insertarNuevoIdImagenIns(idImg);:} sigp  
+        |   error sig
+        |
+;
+
+sigp ::=
+            COMA sig
+        |   error sigp
+        |
+;
