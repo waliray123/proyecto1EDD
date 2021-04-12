@@ -65,6 +65,7 @@ public class ControlDatos {
             //No hay errores y puede insertar los pixeles en las capas
             if (capasIns.isEmpty() == false) {
                 insertarCapas(capasIns);
+                JOptionPane.showMessageDialog(null, "Capas insertadas");
             } else {
                 //No hay capas que insertar
             }
@@ -100,8 +101,13 @@ public class ControlDatos {
                 Capa capaIns = (Capa) ultimo.getVal();
                 String idCapa = String.valueOf(capaIns.getIdCapa());
                 //TODO Validar que el id de la capa no exista en el arbol 
-                insertarPixelesEnCapas(capaIns);
-                this.arbolCapas.insertar(idCapa, capaIns);
+                Capa capaVal = buscarCapaEnArbol(idCapa);
+                if (capaVal == null) {
+                    insertarPixelesEnCapas(capaIns);
+                    this.arbolCapas.insertar(idCapa, capaIns);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Capa con id: " + idCapa + " ya existe por lo que no fue insertada");
+                }
             }
             ultimo = ultimo.getSig();
         }
@@ -127,6 +133,7 @@ public class ControlDatos {
             if (imagenesIns.isEmpty() == false) {
                 //TODO: Insertar imagenes en lista e insertar capas en imagenes                
                 insertarImagenes(imagenesIns);
+                JOptionPane.showMessageDialog(null, "Imagenes insertadas");
             } else {
                 //No hay Imagenes que insertar
             }
@@ -160,6 +167,7 @@ public class ControlDatos {
                 //TODO insertar usuarios en arbol
 //                MostrarUsuarios(usuariosIns);
                 insertarUsuarios(usuariosIns);
+                JOptionPane.showMessageDialog(null, "Usuarios insertados");
             } else {
                 //No hay Imagenes que insertar
             }
@@ -213,9 +221,14 @@ public class ControlDatos {
             if (objErr != null) {
                 //Validar que no esten repeditos los id TODO                           
                 Usuario userIns = (Usuario) ultimo.getVal();
-                insertarImagenesUsuario(userIns);
-                this.arbolUsuarios.insertar(userIns.getNombreUsuario(), userIns);
-                this.contUsuarios++;
+                Usuario usuarioVal = buscarUsuarioEnArbol(userIns.getNombreUsuario());
+                if (usuarioVal == null) {
+                    insertarImagenesUsuario(userIns);
+                    this.arbolUsuarios.insertar(userIns.getNombreUsuario(), userIns);
+                    this.contUsuarios++;
+                } else {
+                    JOptionPane.showMessageDialog(null, "Usuario con id: " + userIns.getNombreUsuario() + " ya existe por lo que no fue insertado");
+                }
             }
             ultimo = ultimo.getSig();
         }
@@ -262,10 +275,17 @@ public class ControlDatos {
         while (ultimo != null) {
             Object objErr = ultimo.getVal();
             if (objErr != null) {
-                //Validar que no esten repeditos los id TODO                          
+                //Validar que no esten repeditos los id TODO   
+
                 Imagen imgIns = (Imagen) ultimo.getVal();
-                insertarCapasEnImagen(imgIns);
-                this.imagenes.insertar(imgIns);
+                int indexImg = buscarIndexImagenEnLista(String.valueOf(imgIns.getIdImagen()));
+                if (indexImg == -1) {
+                    insertarCapasEnImagen(imgIns);
+                    this.imagenes.insertar(imgIns);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Imagen con id: " + imgIns.getIdCapasIns() + " ya existe por lo que no fue insertada");
+                }
+
             }
             ultimo = ultimo.getSig();
         }
@@ -333,8 +353,8 @@ public class ControlDatos {
 
         return -1;
     }
-    
-    public Imagen buscarImagenEnLista(String id) {        
+
+    public Imagen buscarImagenEnLista(String id) {
         NodoListDob<Imagen> aux = imagenes.getRaiz();
         while (aux != null) {
             Imagen img = aux.getInfo();
@@ -343,7 +363,7 @@ public class ControlDatos {
                 if (idImg.equals(id)) {
                     return img;
                 }
-            }            
+            }
             aux = aux.getSig();
         }
 
@@ -412,31 +432,31 @@ public class ControlDatos {
         }
         return "";
     }
-    
-    public ListaEnlSim<Usuario> getTodosUsuarios(){
+
+    public ListaEnlSim<Usuario> getTodosUsuarios() {
         ListaEnlSim<Usuario> usuarios = new ListaEnlSim<>();
-        inOrden(usuarios,this.arbolUsuarios.getRaiz());
+        inOrden(usuarios, this.arbolUsuarios.getRaiz());
         return usuarios;
     }
-    
-    private void inOrden(ListaEnlSim<Usuario> usuarios,NodoAvl<Usuario> nodo){
+
+    private void inOrden(ListaEnlSim<Usuario> usuarios, NodoAvl<Usuario> nodo) {
         if (nodo == null) {
             return;
-        }        
+        }
         inOrden(usuarios, nodo.getIzq());
         if (nodo.getInfo() != null) {
             usuarios.add(usuarios, nodo.getInfo());
-        }        
-        inOrden(usuarios, nodo.getDer());   
+        }
+        inOrden(usuarios, nodo.getDer());
     }
-    
-    public void insertarUsuariosEnArbol(ListaEnlSim<Usuario> usuarios){
+
+    public void insertarUsuariosEnArbol(ListaEnlSim<Usuario> usuarios) {
         this.arbolUsuarios = new ArbolAvl();
         ListaEnlSim ultimo = usuarios;
         while (ultimo != null) {
             Object objErr = ultimo.getVal();
-            if (objErr != null) {                                         
-                Usuario userIns = (Usuario) ultimo.getVal();               
+            if (objErr != null) {
+                Usuario userIns = (Usuario) ultimo.getVal();
                 this.arbolUsuarios.insertar(userIns.getNombreUsuario(), userIns);
                 this.contUsuarios++;
             }

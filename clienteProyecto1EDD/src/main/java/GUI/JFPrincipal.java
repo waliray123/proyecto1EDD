@@ -317,7 +317,7 @@ public class JFPrincipal extends javax.swing.JFrame {
         String documento = "";
         try {
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Archivo Cap", "us"));
+            fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Archivo Usr", "usr"));
             fileChooser.setAcceptAllFileFilterUsed(false);
             int seleccion = fileChooser.showOpenDialog(this);
             if (seleccion == APPROVE_OPTION) {
